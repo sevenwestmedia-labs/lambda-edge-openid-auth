@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "compilerOptions": {
+    "disableSourceOfProjectReferenceRedirect": true
+  },
+  "references": [
+    {
+      "path": "libs/lambda-edge-openid-auth"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+    "name": "@wanews/lambda-edge-openid-auth",
+    "version": "0.0.0",
+    "main": "dist/index.js",
+    "module": "dist/esm/index.js",
+    "author": "Seven West Media WA",
+    "license": "MIT",
+    "peerDependencies": {
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/sevenwestmedia-labs/lambda-edge-openid-auth.git"
+    },
+    "keywords": [
+        "aws",
+        "openid-connect"
+    ],
+    "bugs": {
+        "url": "https://github.com/sevenwestmedia-labs/lambda-edge-openid-auth/issues"
+    },
+    "homepage": "https://github.com/sevenwestmedia-labs/lambda-edge-openid-auth/tree/master/libs/lambda-edge-openid-auth#readme"
+}
