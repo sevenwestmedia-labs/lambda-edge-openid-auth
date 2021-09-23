@@ -1,12 +1,11 @@
 import { CloudFrontRequest } from 'aws-lambda'
-import fs from 'fs'
-import { DiscoveryDocument } from './idps/DiscoveryDocument'
+import { DiscoveryDocument } from './idps/discovery-document'
 import { azureadDiscoveryDoc, azureadJwks } from './idps/azuread'
 import { createKeyIdToPemsLookup } from './utils/jwks'
 
-interface RawConfig {
-    publicUrl?: string
-    idps?: {
+export interface RawConfig {
+    unauthenticatedPaths: string[]
+    idps: {
         clientId: string
         clientSecret: string
         name: string
@@ -23,6 +22,7 @@ export interface Idp {
 }
 
 export interface Config {
+    unauthenticatedPaths: string[]
     callbackPath: string
     logoutCompletePath: string
     logoutPath: string
@@ -33,38 +33,18 @@ export interface Config {
 }
 
 export function getConfig(
+    rawConfig: RawConfig,
     request: CloudFrontRequest,
 ): {
     config: Config
     idps: Idp[]
 } {
     const publicUrl = `https://${request.headers.host[0].value}`
-
-    const config: RawConfig = JSON.parse(
-        fs.readFileSync('config.json', 'utf-8'),
-    )
-
-    if (!config.idps || config.idps.length == 0) {
-        throw new Error('idps is not set in the config')
-    }
-
-    if (
-        config.idps.filter(
-            (idp) =>
-                !idp.name ||
-                !idp.clientId ||
-                !idp.clientSecret ||
-                !idp.tenantId,
-        ).length > 0
-    ) {
-        throw new Error('invalid idp config')
-    }
-
     const callbackPath = '/callback'
     const logoutCompletePath = '/logout-complete'
-
     return {
         config: {
+            unauthenticatedPaths: rawConfig.unauthenticatedPaths,
             callbackPath,
             logoutCompletePath,
             logoutPath: '/logout',
@@ -73,12 +53,14 @@ export function getConfig(
             redirectUri: `${publicUrl}${callbackPath}`,
             postLogoutRedirectUri: `${publicUrl}${logoutCompletePath}`,
         },
-        idps: config.idps.map(({ clientId, clientSecret, name, tenantId }) => ({
-            discoveryDoc: azureadDiscoveryDoc(tenantId),
-            keyIdLookup: createKeyIdToPemsLookup(azureadJwks(tenantId)),
-            name,
-            clientId,
-            clientSecret,
-        })),
+        idps: rawConfig.idps.map(
+            ({ clientId, clientSecret, name, tenantId }) => ({
+                discoveryDoc: azureadDiscoveryDoc(tenantId),
+                keyIdLookup: createKeyIdToPemsLookup(azureadJwks(tenantId)),
+                name,
+                clientId,
+                clientSecret,
+            }),
+        ),
     }
 }

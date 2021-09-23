@@ -4,30 +4,28 @@ import { Config, Idp } from '../config'
 import { redirect } from './redirect'
 import { unauthorized } from '../views/unauthorized'
 import { badRequest } from '../views/bad-request'
+import { Logger } from 'typescript-log'
 
 export async function validateTokenHandler(
     config: Config,
     idpConfig: Idp,
-    token: string,
+    log: Logger,
     request: CloudFrontRequest,
+    token: string,
 ) {
     console.log('Searching for JWK from discovery document')
     const decodedData = jwt.decode(token, {
         complete: true,
     })
 
-    if (
-        !decodedData ||
-        typeof decodedData === 'string' ||
-        !decodedData.header.kid
-    ) {
-        console.warn('Missing data', token)
-        return badRequest('Missing kid')
+    if (!decodedData || !decodedData.header.kid) {
+        log.warn({ token: token }, 'Missing data')
+        return badRequest()
     }
 
     const pem = idpConfig.keyIdLookup[decodedData.header.kid]
     if (!pem) {
-        console.warn('Missing pem', decodedData.header.kid)
+        log.warn({ kid: decodedData.header.kid }, 'Missing pem')
         return unauthorized('Unknown kid', '', '')
     }
 
@@ -41,13 +39,13 @@ export async function validateTokenHandler(
     } catch (err) {
         switch (err.name) {
             case 'TokenExpiredError':
-                console.log('Token expired, redirecting to OIDC provider.')
+                log.info('Token expired, redirecting to OIDC provider.')
                 return redirect(config, idpConfig, request)
             case 'JsonWebTokenError':
-                console.log('JWT error, unauthorized.')
+                log.info('JWT error, unauthorized.')
                 return unauthorized('Json Web Token Error', err.message, '')
             default:
-                console.log('Unknown JWT error, unauthorized.')
+                log.info('Unknown JWT error, unauthorized.')
                 return unauthorized(
                     'Unknown JWT',
                     'User ' + decodedData.payload.email + ' is not permitted.',

@@ -1,4 +1,4 @@
-import { DiscoveryDocument } from './DiscoveryDocument'
+import { DiscoveryDocument } from './discovery-document'
 import { JWKS } from '../utils/jwks'
 
 export const azureadDiscoveryDoc = (tenantId: string): DiscoveryDocument => ({

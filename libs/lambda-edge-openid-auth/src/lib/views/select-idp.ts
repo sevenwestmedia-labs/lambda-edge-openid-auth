@@ -9,9 +9,12 @@ export function selectIdp(
 ): CloudFrontResultResponse {
     const idpsListHtml = idps.map(
         ({ name }) =>
-            `<li><a href="${config.loginPath}?${queryString.stringify({
-                idp: name,
-                next: request.uri,
+            `<li><a href="${queryString.stringifyUrl({
+                url: config.loginPath,
+                query: {
+                    idp: name,
+                    next: request.uri,
+                },
             })}">${name}</a></li>`,
     )
 

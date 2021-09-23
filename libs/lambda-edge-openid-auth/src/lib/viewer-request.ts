@@ -1,8 +1,8 @@
-import { CloudFrontRequestHandler } from 'aws-lambda'
+import { CloudFrontRequest, CloudFrontRequestHandler } from 'aws-lambda'
 import queryString from 'query-string'
 import { callbackHandler } from './handlers/callback'
-import { getConfig } from './config'
-import { Cookies, getCookies } from './utils/cookies'
+import { getConfig, RawConfig } from './config'
+import { getCookies } from './utils/cookies'
 import { internalServerError } from './views/internal-server-error'
 import { redirect } from './handlers/redirect'
 import { selectIdp } from './views/select-idp'
@@ -10,26 +10,27 @@ import { validateTokenHandler } from './handlers/validate-token'
 import { badRequest } from './views/bad-request'
 import { logoutHandler } from './handlers/logout'
 import { logoutCompleteHandler } from './handlers/logout-complete'
+import { CloudFrontRequestResult } from 'aws-lambda/trigger/cloudfront-request'
+import { Logger } from 'typescript-log'
 
-const unauthenticatedPaths = ['/assets']
-
-export const handler: CloudFrontRequestHandler = async (event, context) => {
-    const record = event.Records[0]
-    const request = record.cf.request
-
+export const authenticateViewerRequest = async (
+    rawConfig: RawConfig,
+    log: Logger,
+    request: CloudFrontRequest,
+): Promise<CloudFrontRequestResult> => {
     try {
-        const { config, idps } = getConfig(request)
+        const { config, idps } = getConfig(rawConfig, request)
 
         // require no authentication for unauthenticated paths
         if (
-            unauthenticatedPaths.some((unAuthenticatedPath) =>
+            config.unauthenticatedPaths.some((unAuthenticatedPath) =>
                 request.uri.startsWith(unAuthenticatedPath),
             )
         ) {
             return request
         }
 
-        const cookies: Cookies = getCookies(request)
+        const cookies = getCookies(request)
 
         const isLoginPath = request.uri.startsWith(config.loginPath)
 
@@ -46,8 +47,8 @@ export const handler: CloudFrontRequestHandler = async (event, context) => {
         // Validate if it's a configured IDP
         const idpConfig = idps.find(({ name }) => idp === name)
         if (!idpConfig) {
-            console.warn(`Unknown idp: ${idp}`)
-            return badRequest('Unsupported IDP')
+            log.warn(`Unknown idp: ${idp}`)
+            return badRequest()
         }
 
         if (isLoginPath) {
@@ -55,8 +56,14 @@ export const handler: CloudFrontRequestHandler = async (event, context) => {
         }
 
         if (request.uri.startsWith(config.callbackPath)) {
-            console.log('Callback from OIDC provider received')
-            return callbackHandler(config, idpConfig, request, cookies.NONCE)
+            log.info('Callback from OIDC provider received')
+            return callbackHandler(
+                config,
+                idpConfig,
+                log,
+                request,
+                cookies.NONCE,
+            )
         }
 
         if (request.uri.startsWith(config.logoutCompletePath)) {
@@ -68,18 +75,19 @@ export const handler: CloudFrontRequestHandler = async (event, context) => {
         }
 
         if (cookies && cookies.TOKEN) {
-            console.log('Request received with TOKEN cookie. Validating.')
+            log.info('Request received with TOKEN cookie. Validating.')
             return validateTokenHandler(
                 config,
                 idpConfig,
-                cookies.TOKEN,
+                log,
                 request,
+                cookies.TOKEN,
             )
         }
 
         return redirect(config, idpConfig, request)
     } catch (err) {
-        console.log('Internal server error', err)
+        log.error({ err }, 'Error encountered when authenticating request')
         return internalServerError()
     }
 }

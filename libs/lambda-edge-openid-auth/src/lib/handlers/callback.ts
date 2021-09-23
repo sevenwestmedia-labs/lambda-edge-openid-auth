@@ -8,6 +8,7 @@ import { redirect } from './redirect'
 import { unauthorized } from '../views/unauthorized'
 import { validateNonce } from '../utils/nonce'
 import { badRequest } from '../views/bad-request'
+import { Logger } from 'typescript-log'
 
 const IDP_ERRORS: { [key: string]: string } = {
     invalid_request: 'Invalid Request',
@@ -22,6 +23,7 @@ const IDP_ERRORS: { [key: string]: string } = {
 export async function callbackHandler(
     config: Config,
     idpConfig: Idp,
+    log: Logger,
     request: CloudFrontRequest,
     nonce?: string,
 ): Promise<CloudFrontResultResponse> {
@@ -30,7 +32,7 @@ export async function callbackHandler(
     // Check for error response (https://tools.ietf.org/html/rfc6749#section-4.2.2.1)
     if (queryDict.error) {
         if (Array.isArray(queryDict.error)) {
-            return badRequest('Unable to parse error from IDP')
+            return badRequest()
         }
         const error = IDP_ERRORS[queryDict.error] || queryDict.error
 
@@ -57,8 +59,8 @@ export async function callbackHandler(
 
     // Verify state in querystring is a string
     if (!queryDict.state || typeof queryDict.state !== 'string') {
-        console.warn('invalid state', queryDict.state)
-        return badRequest('Invalid state')
+        log.warn({ state: queryDict.state }, 'invalid state')
+        return badRequest()
     }
 
     // Exchange code for authorization token
@@ -70,7 +72,7 @@ export async function callbackHandler(
         client_secret: idpConfig.clientSecret,
     }
     const postData = queryString.stringify(tokenRequest)
-    console.log('Requesting access token.')
+    log.info('Requesting access token.')
     const tokenResponse = await fetch(idpConfig.discoveryDoc.token_endpoint, {
         method: 'POST',
         headers: {
@@ -79,48 +81,46 @@ export async function callbackHandler(
         body: new URLSearchParams(postData).toString(),
     })
     if (tokenResponse.status !== 200) {
-        console.error(
+        log.error(
+            {
+                errorBody: await tokenResponse.text(),
+                statusCode: tokenResponse.status,
+            },
             'Token exchange failed',
-            tokenResponse.status,
-            await tokenResponse.text(),
         )
-        return badRequest('Token exchange with IDP failed')
+        return badRequest()
     }
     const parsedTokenResponse: any = await tokenResponse.json()
 
-    console.log('Decoding JWT')
+    log.info('Decoding JWT')
     const decodedData = jwt.decode(parsedTokenResponse.id_token, {
         complete: true,
     })
 
-    if (
-        !decodedData ||
-        typeof decodedData === 'string' ||
-        !decodedData.header.kid
-    ) {
-        console.warn('Missing data', parsedTokenResponse)
-        return badRequest('Missing kid')
+    if (!decodedData || !decodedData.header.kid) {
+        log.warn({ res: parsedTokenResponse }, 'Missing data')
+        return badRequest()
     }
 
-    console.log('Searching for JWK from discovery document')
+    log.info('Searching for JWK from discovery document')
     const pem = idpConfig.keyIdLookup[decodedData.header.kid]
     if (!pem) {
-        console.warn('Missing pem', decodedData.header.kid)
+        log.warn({ kid: decodedData.header.kid }, 'Missing pem')
         return unauthorized('Unknown kid', '', '')
     }
 
     try {
-        console.log('Verifying JWT')
+        log.info('Verifying JWT')
         const decoded = jwt.verify(parsedTokenResponse.id_token, pem, {
             algorithms: ['RS256'],
-        }) as Record<string, any> | string
+        })
 
         if (typeof decoded === 'string') {
-            console.warn(
+            log.warn(
+                { payload: decoded },
                 'Failed to verify JWT, returned value is string',
-                decoded,
             )
-            return badRequest('Invalid payload from JWT')
+            return badRequest()
         }
 
         if (!nonce || !validateNonce(decoded.nonce, nonce)) {
@@ -166,13 +166,13 @@ export async function callbackHandler(
     } catch (err) {
         switch (err.name) {
             case 'TokenExpiredError':
-                console.log('Token expired, redirecting to OIDC provider.')
+                log.info('Token expired, redirecting to OIDC provider.')
                 return redirect(config, idpConfig, request)
             case 'JsonWebTokenError':
-                console.log('JWT error, unauthorized.', err)
+                log.info({ err }, 'JWT error, unauthorized.')
                 return unauthorized('Json Web Token Error', err.message, '')
             default:
-                console.log('Unknown JWT error, unauthorized.')
+                log.info('Unknown JWT error, unauthorized.')
                 return unauthorized(
                     'Unknown JWT',
                     `User ${decodedData.payload.email} is not permitted.`,
