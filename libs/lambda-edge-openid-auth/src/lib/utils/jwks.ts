@@ -10,6 +10,12 @@ export interface JWKS {
         e: string
         x5c?: string[]
         issuer?: string
+        d?: string
+        p?: string
+        q?: string
+        dp?: string
+        dq?: string
+        qi?: string
     }>
 }
 

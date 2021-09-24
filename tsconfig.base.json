@@ -19,7 +19,9 @@
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "paths": {}
+    "paths": {
+        "jose/*": ["node_modules/.pnpm/jose@3.18.0/node_modules/jose/dist/node/cjs/*"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
