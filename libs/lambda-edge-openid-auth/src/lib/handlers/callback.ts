@@ -163,7 +163,7 @@ export async function callbackHandler(
                 ],
             },
         }
-    } catch (err) {
+    } catch (err: any) {
         switch (err.name) {
             case 'TokenExpiredError':
                 log.info('Token expired, redirecting to OIDC provider.')

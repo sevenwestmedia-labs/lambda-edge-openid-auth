@@ -2,7 +2,7 @@ import { CloudFrontRequest } from 'aws-lambda'
 
 export function cloudfrontRequest(
     href: string,
-    cookies?: [],
+    cookies?: string[],
 ): CloudFrontRequest {
     // Adding in any base url as we only have a relative url and URL needs to be a full url
     const uri = new URL(href, 'http://localhost')

@@ -1,4 +1,4 @@
-import { CloudFrontRequest, CloudFrontRequestHandler } from 'aws-lambda'
+import { CloudFrontRequest } from 'aws-lambda'
 import queryString from 'query-string'
 import { callbackHandler } from './handlers/callback'
 import { getConfig, RawConfig } from './config'
@@ -86,8 +86,8 @@ export const authenticateViewerRequest = async (
         }
 
         return redirect(config, idpConfig, request)
-    } catch (err) {
-        log.error({ err }, 'Error encountered when authenticating request')
+    } catch (err: any) {
+        log.error(err, 'Error encountered when authenticating request')
         return internalServerError()
     }
 }

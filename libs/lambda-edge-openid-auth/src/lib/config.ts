@@ -1,7 +1,7 @@
 import { CloudFrontRequest } from 'aws-lambda'
 import { DiscoveryDocument } from './idps/discovery-document'
-import { azureadDiscoveryDoc, azureadJwks } from './idps/azuread'
 import { createKeyIdToPemsLookup } from './utils/jwks'
+import { providerMetadata, ProviderName, ProviderProps } from './idps'
 
 export interface RawConfig {
     unauthenticatedPaths: string[]
@@ -9,7 +9,8 @@ export interface RawConfig {
         clientId: string
         clientSecret: string
         name: string
-        tenantId: string
+        type: ProviderName
+        props: ProviderProps
     }[]
 }
 
@@ -54,13 +55,16 @@ export function getConfig(
             postLogoutRedirectUri: `${publicUrl}${logoutCompletePath}`,
         },
         idps: rawConfig.idps.map(
-            ({ clientId, clientSecret, name, tenantId }) => ({
-                discoveryDoc: azureadDiscoveryDoc(tenantId),
-                keyIdLookup: createKeyIdToPemsLookup(azureadJwks(tenantId)),
-                name,
-                clientId,
-                clientSecret,
-            }),
+            ({ clientId, clientSecret, name, type, props }) => {
+                const { discoveryDoc, jwks } = providerMetadata[type](props)
+                return {
+                    discoveryDoc,
+                    keyIdLookup: createKeyIdToPemsLookup(jwks),
+                    name,
+                    clientId,
+                    clientSecret,
+                }
+            },
         ),
     }
 }
