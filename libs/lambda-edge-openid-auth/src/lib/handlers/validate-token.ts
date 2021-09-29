@@ -36,7 +36,7 @@ export async function validateTokenHandler(
         })
 
         return request
-    } catch (err) {
+    } catch (err: any) {
         switch (err.name) {
             case 'TokenExpiredError':
                 log.info('Token expired, redirecting to OIDC provider.')

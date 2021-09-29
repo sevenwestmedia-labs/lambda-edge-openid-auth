@@ -1,10 +1,10 @@
 name: Build & Test CI
-concurrency: main
+concurrency: master
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   version:
