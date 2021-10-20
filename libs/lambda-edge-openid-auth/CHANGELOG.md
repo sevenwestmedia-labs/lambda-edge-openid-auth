@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.0.3
+
+### Patch Changes
+
+- 7b60ce2: More build issue fixes
+
 ## 0.0.2
 
 ### Patch Changes
