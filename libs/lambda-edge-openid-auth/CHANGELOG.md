@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.0.4
+
+### Patch Changes
+
+- d0cc0af: Set dependencies in package.json
+
 ## 0.0.3
 
 ### Patch Changes
