@@ -6,6 +6,7 @@
     "author": "Seven West Media WA",
     "license": "MIT",
     "peerDependencies": {
+        "node-fetch": "^2.6.5"
     },
     "repository": {
         "type": "git",

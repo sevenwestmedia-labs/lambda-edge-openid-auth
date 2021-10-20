@@ -10,7 +10,7 @@
                     "executor": "@wanews/nx-typescript-project-references:package",
                     "options": {
                         "main": "libs/lambda-edge-openid-auth/src/index.ts",
-                        "tsConfig": "libs/lambda-edge-openid-auth/tsconfig.json"
+                        "updateBuildableProjectDepsInPackageJson": true
                     }
                 },
                 "lint": {
