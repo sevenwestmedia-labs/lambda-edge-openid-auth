@@ -104,7 +104,16 @@ importers:
       typescript: 4.4.3
 
   libs/lambda-edge-openid-auth:
-    specifiers: {}
+    specifiers:
+      cookie: ^0.4.1
+      jsonwebtoken: ^8.5.1
+      jwk-to-pem: ^2.0.5
+      query-string: ^7.0.1
+    dependencies:
+      cookie: 0.4.1
+      jsonwebtoken: 8.5.1
+      jwk-to-pem: 2.0.5
+      query-string: 7.0.1
 
 packages:
 
