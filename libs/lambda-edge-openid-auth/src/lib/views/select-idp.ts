@@ -29,7 +29,7 @@ export function selectIdp(
     <div class="cover">
         <h1>Select login provider</h1>
         <ul>
-           ${idpsListHtml}
+           ${idpsListHtml.join('')}
         </ul>
     </div>
 </body>
