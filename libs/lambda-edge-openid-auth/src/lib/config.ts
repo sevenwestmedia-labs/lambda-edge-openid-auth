@@ -3,15 +3,17 @@ import { DiscoveryDocument } from './idps/discovery-document'
 import { createKeyIdToPemsLookup } from './utils/jwks'
 import { providerMetadata, ProviderName, ProviderProps } from './idps'
 
+export interface RawIdp {
+    clientId: string
+    clientSecret: string
+    name: string
+    type: ProviderName
+    props: ProviderProps
+}
+
 export interface RawConfig {
     unauthenticatedPaths: string[]
-    idps: {
-        clientId: string
-        clientSecret: string
-        name: string
-        type: ProviderName
-        props: ProviderProps
-    }[]
+    idps: RawIdp[]
 }
 
 export interface Idp {

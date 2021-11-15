@@ -7,16 +7,15 @@ export function selectIdp(
     idps: Idp[],
     request: CloudFrontRequest,
 ): CloudFrontResultResponse {
-    const idpsListHtml = idps.map(
-        ({ name }) =>
-            `<li><a href="${queryString.stringifyUrl({
-                url: config.loginPath,
-                query: {
-                    idp: name,
-                    next: request.uri,
-                },
-            })}">${name}</a></li>`,
-    )
+    const idpsListHtml = idps.map(({ name }) => {
+        return `<li><a href="${queryString.stringifyUrl({
+            url: config.loginPath,
+            query: {
+                idp: name,
+                next: request.uri,
+            },
+        })}">${name}</a></li>`
+    })
 
     const page = `<!DOCTYPE html>
 <html lang="en">
