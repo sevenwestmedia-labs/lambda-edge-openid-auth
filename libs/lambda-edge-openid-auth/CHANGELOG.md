@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.0.6
+
+### Patch Changes
+
+- 8bb0c71: Fixed trailing comma appearing in selectIdp page when multiple IDPs are defined
+
 ## 0.0.4
 
 ### Patch Changes
