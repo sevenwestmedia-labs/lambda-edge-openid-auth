@@ -147,6 +147,7 @@ export async function callbackHandler(
                             parsedTokenResponse.id_token,
                             {
                                 path: '/',
+                                secure: true,
                                 domain: config.domain,
                                 expires: decoded.exp
                                     ? new Date(decoded.exp * 1000)

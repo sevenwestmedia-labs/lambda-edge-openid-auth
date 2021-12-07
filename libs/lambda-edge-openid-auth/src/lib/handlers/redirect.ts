@@ -41,6 +41,7 @@ export function redirect(
                     key: 'Set-Cookie',
                     value: cookie.serialize('IDP', idpConfig.name, {
                         path: '/',
+                        secure: true,
                         domain: config.domain,
                         httpOnly: true,
                     }),
@@ -57,6 +58,7 @@ export function redirect(
                     key: 'Set-Cookie',
                     value: cookie.serialize('NONCE', n[1], {
                         path: '/',
+                        secure: true,
                         domain: config.domain,
                         httpOnly: true,
                     }),
