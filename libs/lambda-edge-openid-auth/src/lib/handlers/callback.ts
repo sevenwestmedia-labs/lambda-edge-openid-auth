@@ -32,7 +32,7 @@ export async function callbackHandler(
     // Check for error response (https://tools.ietf.org/html/rfc6749#section-4.2.2.1)
     if (queryDict.error) {
         if (Array.isArray(queryDict.error)) {
-            return badRequest()
+            return badRequest(config)
         }
         const error = IDP_ERRORS[queryDict.error] || queryDict.error
 
@@ -60,7 +60,7 @@ export async function callbackHandler(
     // Verify state in querystring is a string
     if (!queryDict.state || typeof queryDict.state !== 'string') {
         log.warn({ state: queryDict.state }, 'invalid state')
-        return badRequest()
+        return badRequest(config)
     }
 
     // Exchange code for authorization token
@@ -88,7 +88,7 @@ export async function callbackHandler(
             },
             'Token exchange failed',
         )
-        return badRequest()
+        return badRequest(config)
     }
     const parsedTokenResponse: any = await tokenResponse.json()
 
@@ -99,7 +99,7 @@ export async function callbackHandler(
 
     if (!decodedData || !decodedData.header.kid) {
         log.warn({ res: parsedTokenResponse }, 'Missing data')
-        return badRequest()
+        return badRequest(config)
     }
 
     log.info('Searching for JWK from discovery document')
@@ -120,7 +120,7 @@ export async function callbackHandler(
                 { payload: decoded },
                 'Failed to verify JWT, returned value is string',
             )
-            return badRequest()
+            return badRequest(config)
         }
 
         if (!nonce || !validateNonce(decoded.nonce, nonce)) {

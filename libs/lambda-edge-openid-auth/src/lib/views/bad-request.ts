@@ -1,6 +1,8 @@
 import { CloudFrontResultResponse } from 'aws-lambda/common/cloudfront'
+import cookie from 'cookie'
+import { Config } from '../config'
 
-export function badRequest(): CloudFrontResultResponse {
+export function badRequest(config: Config): CloudFrontResultResponse {
     const page = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,5 +21,33 @@ export function badRequest(): CloudFrontResultResponse {
         status: '400',
         statusDescription: 'Bad Request',
         body: page,
+        headers: {
+            'set-cookie': [
+                {
+                    key: 'Set-Cookie',
+                    value: cookie.serialize('TOKEN', '', {
+                        path: '/',
+                        domain: config.domain,
+                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+                    }),
+                },
+                {
+                    key: 'Set-Cookie',
+                    value: cookie.serialize('NONCE', '', {
+                        path: '/',
+                        domain: config.domain,
+                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+                    }),
+                },
+                {
+                    key: 'Set-Cookie',
+                    value: cookie.serialize('IDP', '', {
+                        path: '/',
+                        domain: config.domain,
+                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+                    }),
+                },
+            ],
+        },
     }
 }

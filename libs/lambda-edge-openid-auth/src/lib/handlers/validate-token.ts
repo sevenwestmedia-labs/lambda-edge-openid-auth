@@ -20,7 +20,7 @@ export async function validateTokenHandler(
 
     if (!decodedData || !decodedData.header.kid) {
         log.warn({ token: token }, 'Missing data')
-        return badRequest()
+        return badRequest(config)
     }
 
     const pem = idpConfig.keyIdLookup[decodedData.header.kid]
