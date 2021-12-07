@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.0.8
+
+### Patch Changes
+
+- e231d8f: Added missing jwks keys for azuread
+
 ## 0.0.7
 
 ### Patch Changes
