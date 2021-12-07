@@ -1,5 +1,12 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.0.7
+
+### Patch Changes
+
+- 997b27b: Explicity set the domain in set-cookie responses, and ensure secure: true
+- 1d995db: clear cookies in 400 error page
+
 ## 0.0.6
 
 ### Patch Changes
