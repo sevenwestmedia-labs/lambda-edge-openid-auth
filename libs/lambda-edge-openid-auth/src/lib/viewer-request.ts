@@ -48,7 +48,7 @@ export const authenticateViewerRequest = async (
         const idpConfig = idps.find(({ name }) => idp === name)
         if (!idpConfig) {
             log.warn(`Unknown idp: ${idp}`)
-            return badRequest()
+            return badRequest(config)
         }
 
         if (isLoginPath) {

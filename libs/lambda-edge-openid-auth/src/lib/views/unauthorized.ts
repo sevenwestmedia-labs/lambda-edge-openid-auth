@@ -1,7 +1,9 @@
 import { CloudFrontResultResponse } from 'aws-lambda'
 import cookie from 'cookie'
+import { Config } from '../config'
 
 export function unauthorized(
+    config: Config,
     error: string,
     error_description: string,
     error_uri: string,
@@ -31,6 +33,7 @@ export function unauthorized(
                     key: 'Set-Cookie',
                     value: cookie.serialize('TOKEN', '', {
                         path: '/',
+                        domain: config.domain,
                         expires: new Date(1970, 1, 1, 0, 0, 0, 0),
                     }),
                 },
@@ -38,6 +41,7 @@ export function unauthorized(
                     key: 'Set-Cookie',
                     value: cookie.serialize('NONCE', '', {
                         path: '/',
+                        domain: config.domain,
                         expires: new Date(1970, 1, 1, 0, 0, 0, 0),
                     }),
                 },

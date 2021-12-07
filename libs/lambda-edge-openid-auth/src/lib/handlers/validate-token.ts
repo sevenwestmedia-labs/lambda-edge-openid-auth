@@ -20,13 +20,13 @@ export async function validateTokenHandler(
 
     if (!decodedData || !decodedData.header.kid) {
         log.warn({ token: token }, 'Missing data')
-        return badRequest()
+        return badRequest(config)
     }
 
     const pem = idpConfig.keyIdLookup[decodedData.header.kid]
     if (!pem) {
         log.warn({ kid: decodedData.header.kid }, 'Missing pem')
-        return unauthorized('Unknown kid', '', '')
+        return unauthorized(config, 'Unknown kid', '', '')
     }
 
     try {
@@ -43,10 +43,16 @@ export async function validateTokenHandler(
                 return redirect(config, idpConfig, request)
             case 'JsonWebTokenError':
                 log.info('JWT error, unauthorized.')
-                return unauthorized('Json Web Token Error', err.message, '')
+                return unauthorized(
+                    config,
+                    'Json Web Token Error',
+                    err.message,
+                    '',
+                )
             default:
                 log.info('Unknown JWT error, unauthorized.')
                 return unauthorized(
+                    config,
                     'Unknown JWT',
                     'User ' + decodedData.payload.email + ' is not permitted.',
                     '',
