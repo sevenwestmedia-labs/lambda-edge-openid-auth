@@ -31,6 +31,7 @@ export interface Config {
     logoutPath: string
     loginPath: string
     publicUrl: string
+    domain: string
     redirectUri: string
     postLogoutRedirectUri: string
 }
@@ -53,6 +54,7 @@ export function getConfig(
             logoutPath: '/logout',
             loginPath: '/login',
             publicUrl,
+            domain: request.headers.host[0].value,
             redirectUri: `${publicUrl}${callbackPath}`,
             postLogoutRedirectUri: `${publicUrl}${logoutCompletePath}`,
         },

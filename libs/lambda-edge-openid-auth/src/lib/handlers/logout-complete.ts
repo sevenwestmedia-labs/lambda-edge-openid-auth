@@ -18,6 +18,7 @@ export function logoutCompleteHandler(config: Config) {
                     key: 'Set-Cookie',
                     value: cookie.serialize('IDP', '', {
                         path: '/',
+                        domain: config.domain,
                         httpOnly: true,
                     }),
                 },
@@ -25,6 +26,7 @@ export function logoutCompleteHandler(config: Config) {
                     key: 'Set-Cookie',
                     value: cookie.serialize('TOKEN', '', {
                         path: '/',
+                        domain: config.domain,
                         expires: new Date(1970, 1, 1, 0, 0, 0, 0),
                     }),
                 },
@@ -32,6 +34,7 @@ export function logoutCompleteHandler(config: Config) {
                     key: 'Set-Cookie',
                     value: cookie.serialize('NONCE', '', {
                         path: '/',
+                        domain: config.domain,
                         httpOnly: true,
                     }),
                 },

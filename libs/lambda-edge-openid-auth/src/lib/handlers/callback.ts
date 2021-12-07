@@ -49,12 +49,12 @@ export async function callbackHandler(
             error_uri = queryDict.error_uri
         }
 
-        return unauthorized(error, error_description, error_uri)
+        return unauthorized(config, error, error_description, error_uri)
     }
 
     // Verify code is in querystring
     if (!queryDict.code) {
-        return unauthorized('No Code Found', '', '')
+        return unauthorized(config, 'No Code Found', '', '')
     }
 
     // Verify state in querystring is a string
@@ -106,7 +106,7 @@ export async function callbackHandler(
     const pem = idpConfig.keyIdLookup[decodedData.header.kid]
     if (!pem) {
         log.warn({ kid: decodedData.header.kid }, 'Missing pem')
-        return unauthorized('Unknown kid', '', '')
+        return unauthorized(config, 'Unknown kid', '', '')
     }
 
     try {
@@ -124,7 +124,7 @@ export async function callbackHandler(
         }
 
         if (!nonce || !validateNonce(decoded.nonce, nonce)) {
-            return unauthorized('Nonce Verification Failed', '', '')
+            return unauthorized(config, 'Nonce Verification Failed', '', '')
         }
 
         // Once verified, create new JWT for this server
@@ -147,6 +147,7 @@ export async function callbackHandler(
                             parsedTokenResponse.id_token,
                             {
                                 path: '/',
+                                domain: config.domain,
                                 expires: decoded.exp
                                     ? new Date(decoded.exp * 1000)
                                     : undefined,
@@ -157,6 +158,7 @@ export async function callbackHandler(
                         key: 'Set-Cookie',
                         value: cookie.serialize('NONCE', '', {
                             path: '/',
+                            domain: config.domain,
                             expires: new Date(1970, 1, 1, 0, 0, 0, 0),
                         }),
                     },
@@ -170,10 +172,16 @@ export async function callbackHandler(
                 return redirect(config, idpConfig, request)
             case 'JsonWebTokenError':
                 log.info({ err }, 'JWT error, unauthorized.')
-                return unauthorized('Json Web Token Error', err.message, '')
+                return unauthorized(
+                    config,
+                    'Json Web Token Error',
+                    err.message,
+                    '',
+                )
             default:
                 log.info('Unknown JWT error, unauthorized.')
                 return unauthorized(
+                    config,
                     'Unknown JWT',
                     `User ${decodedData.payload.email} is not permitted.`,
                     '',
