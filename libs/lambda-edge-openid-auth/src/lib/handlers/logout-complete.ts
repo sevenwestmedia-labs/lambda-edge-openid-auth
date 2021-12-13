@@ -13,14 +13,16 @@ export function logoutCompleteHandler(config: Config) {
                     value: config.publicUrl,
                 },
             ],
-            'set-cookie': ['TOKEN', 'NONCE', 'IDP'].map((name) => ({
-                key: 'Set-Cookie',
-                value: cookie.serialize(name, '', {
-                    path: '/',
-                    domain: config.domain,
-                    expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+            'set-cookie': ['TOKEN', 'REFRESH_TOKEN', 'NONCE', 'IDP'].map(
+                (name) => ({
+                    key: 'Set-Cookie',
+                    value: cookie.serialize(name, '', {
+                        path: '/',
+                        domain: config.domain,
+                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+                    }),
                 }),
-            })),
+            ),
         },
     }
 }

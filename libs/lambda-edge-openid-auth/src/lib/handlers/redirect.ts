@@ -16,7 +16,7 @@ export function redirect(
         redirect_uri: config.redirectUri,
         response_type: 'code',
         response_mode: 'query',
-        scope: 'openid',
+        scope: 'openid offline_access',
         nonce: n[0],
         state: queryDict.next || '/',
         client_id: idpConfig.clientId,
@@ -47,6 +47,14 @@ export function redirect(
                 {
                     key: 'Set-Cookie',
                     value: cookie.serialize('TOKEN', '', {
+                        path: '/',
+                        domain: config.domain,
+                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+                    }),
+                },
+                {
+                    key: 'Set-Cookie',
+                    value: cookie.serialize('REFRESH_TOKEN', '', {
                         path: '/',
                         domain: config.domain,
                         expires: new Date(1970, 1, 1, 0, 0, 0, 0),
