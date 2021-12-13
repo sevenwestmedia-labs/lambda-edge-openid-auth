@@ -30,6 +30,7 @@ export interface Config {
     logoutCompletePath: string
     logoutPath: string
     loginPath: string
+    refreshPath: string
     publicUrl: string
     redirectUri: string
     postLogoutRedirectUri: string
@@ -52,6 +53,7 @@ export function getConfig(
             logoutCompletePath,
             logoutPath: '/logout',
             loginPath: '/login',
+            refreshPath: '/refresh',
             publicUrl,
             redirectUri: `${publicUrl}${callbackPath}`,
             postLogoutRedirectUri: `${publicUrl}${logoutCompletePath}`,

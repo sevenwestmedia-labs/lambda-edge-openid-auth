@@ -1,14 +1,11 @@
 import { CloudFrontRequest, CloudFrontResultResponse } from 'aws-lambda'
 import cookie from 'cookie'
-import jwt from 'jsonwebtoken'
-import fetch from 'node-fetch'
 import queryString from 'query-string'
 import { Config, Idp } from '../config'
-import { redirect } from './redirect'
 import { unauthorized } from '../views/unauthorized'
-import { validateNonce } from '../utils/nonce'
 import { badRequest } from '../views/bad-request'
 import { Logger } from 'typescript-log'
+import { fetchToken, verifyIdToken } from '../utils/auth-token'
 
 const IDP_ERRORS: { [key: string]: string } = {
     invalid_request: 'Invalid Request',
@@ -53,7 +50,7 @@ export async function callbackHandler(
     }
 
     // Verify code is in querystring
-    if (!queryDict.code) {
+    if (!queryDict.code || typeof queryDict.code !== 'string') {
         return unauthorized('No Code Found', '', '')
     }
 
@@ -63,121 +60,64 @@ export async function callbackHandler(
         return badRequest()
     }
 
-    // Exchange code for authorization token
-    const tokenRequest = {
-        redirect_uri: config.redirectUri,
-        grant_type: 'authorization_code',
-        code: queryDict.code,
-        client_id: idpConfig.clientId,
-        client_secret: idpConfig.clientSecret,
-    }
-    const postData = queryString.stringify(tokenRequest)
-    log.info('Requesting access token.')
-    const tokenResponse = await fetch(idpConfig.discoveryDoc.token_endpoint, {
-        method: 'POST',
+    const {
+        id_token: idToken,
+        refresh_token: refreshToken,
+        expires_in: tokenExpiresIn,
+    } = await fetchToken(log, idpConfig, config.redirectUri, queryDict.code)
+
+    const payload = verifyIdToken(log, idpConfig, idToken, nonce)
+
+    const tokenExpiry =
+        payload.exp ?? new Date().getTime() / 1000 + tokenExpiresIn
+
+    // Once verified, create new JWT for this server
+    return {
+        status: '302',
+        statusDescription: 'Found',
+        body: 'ID token retrieved.',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            location: [
+                {
+                    key: 'Location',
+                    value: queryDict.state,
+                },
+            ],
+            'set-cookie': [
+                {
+                    key: 'Set-Cookie',
+                    value: cookie.serialize('TOKEN', idToken, {
+                        path: '/',
+                        expires: new Date(tokenExpiry * 1000),
+                    }),
+                },
+                {
+                    key: 'Set-Cookie',
+                    value: cookie.serialize('NONCE', '', {
+                        path: '/',
+                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+                    }),
+                },
+                ...(refreshToken
+                    ? [
+                          {
+                              key: 'Set-Cookie',
+                              value: cookie.serialize(
+                                  'REFRESH_TOKEN',
+                                  refreshToken,
+                                  {
+                                      path: '/',
+                                      expires: new Date(
+                                          (tokenExpiry + 60 * 60 * 24 * 7) *
+                                              1000,
+                                      ),
+                                      httpOnly: true,
+                                  },
+                              ),
+                          },
+                      ]
+                    : []),
+            ],
         },
-        body: new URLSearchParams(postData).toString(),
-    })
-    if (tokenResponse.status !== 200) {
-        log.error(
-            {
-                errorBody: await tokenResponse.text(),
-                statusCode: tokenResponse.status,
-            },
-            'Token exchange failed',
-        )
-        return badRequest()
-    }
-    const parsedTokenResponse: any = await tokenResponse.json()
-
-    log.info('Decoding JWT')
-    const decodedData = jwt.decode(parsedTokenResponse.id_token, {
-        complete: true,
-    })
-
-    if (!decodedData || !decodedData.header.kid) {
-        log.warn({ res: parsedTokenResponse }, 'Missing data')
-        return badRequest()
-    }
-
-    log.info('Searching for JWK from discovery document')
-    const pem = idpConfig.keyIdLookup[decodedData.header.kid]
-    if (!pem) {
-        log.warn({ kid: decodedData.header.kid }, 'Missing pem')
-        return unauthorized('Unknown kid', '', '')
-    }
-
-    try {
-        log.info('Verifying JWT')
-        const decoded = jwt.verify(parsedTokenResponse.id_token, pem, {
-            algorithms: ['RS256'],
-        })
-
-        if (typeof decoded === 'string') {
-            log.warn(
-                { payload: decoded },
-                'Failed to verify JWT, returned value is string',
-            )
-            return badRequest()
-        }
-
-        if (!nonce || !validateNonce(decoded.nonce, nonce)) {
-            return unauthorized('Nonce Verification Failed', '', '')
-        }
-
-        // Once verified, create new JWT for this server
-        return {
-            status: '302',
-            statusDescription: 'Found',
-            body: 'ID token retrieved.',
-            headers: {
-                location: [
-                    {
-                        key: 'Location',
-                        value: queryDict.state,
-                    },
-                ],
-                'set-cookie': [
-                    {
-                        key: 'Set-Cookie',
-                        value: cookie.serialize(
-                            'TOKEN',
-                            parsedTokenResponse.id_token,
-                            {
-                                path: '/',
-                                expires: decoded.exp
-                                    ? new Date(decoded.exp * 1000)
-                                    : undefined,
-                            },
-                        ),
-                    },
-                    {
-                        key: 'Set-Cookie',
-                        value: cookie.serialize('NONCE', '', {
-                            path: '/',
-                            expires: new Date(1970, 1, 1, 0, 0, 0, 0),
-                        }),
-                    },
-                ],
-            },
-        }
-    } catch (err: any) {
-        switch (err.name) {
-            case 'TokenExpiredError':
-                log.info('Token expired, redirecting to OIDC provider.')
-                return redirect(config, idpConfig, request)
-            case 'JsonWebTokenError':
-                log.info({ err }, 'JWT error, unauthorized.')
-                return unauthorized('Json Web Token Error', err.message, '')
-            default:
-                log.info('Unknown JWT error, unauthorized.')
-                return unauthorized(
-                    'Unknown JWT',
-                    `User ${decodedData.payload.email} is not permitted.`,
-                    '',
-                )
-        }
     }
 }
