@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.1.0
+
+### Minor Changes
+
+- 483ed1a: Added token refresh endpoint
+
 ## 0.0.8
 
 ### Patch Changes
