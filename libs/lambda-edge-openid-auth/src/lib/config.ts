@@ -30,6 +30,7 @@ export interface Config {
     logoutCompletePath: string
     logoutPath: string
     loginPath: string
+    refreshPath: string
     publicUrl: string
     domain: string
     redirectUri: string
@@ -53,6 +54,7 @@ export function getConfig(
             logoutCompletePath,
             logoutPath: '/logout',
             loginPath: '/login',
+            refreshPath: '/refresh-token',
             publicUrl,
             domain: request.headers.host[0].value,
             redirectUri: `${publicUrl}${callbackPath}`,
