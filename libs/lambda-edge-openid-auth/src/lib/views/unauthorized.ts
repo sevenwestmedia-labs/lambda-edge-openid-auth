@@ -28,24 +28,14 @@ export function unauthorized(
         statusDescription: 'Unauthorized',
         body: page,
         headers: {
-            'set-cookie': [
-                {
-                    key: 'Set-Cookie',
-                    value: cookie.serialize('TOKEN', '', {
-                        path: '/',
-                        domain: config.domain,
-                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
-                    }),
-                },
-                {
-                    key: 'Set-Cookie',
-                    value: cookie.serialize('NONCE', '', {
-                        path: '/',
-                        domain: config.domain,
-                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
-                    }),
-                },
-            ],
+            'set-cookie': ['TOKEN', 'NONCE'].map((name) => ({
+                key: 'Set-Cookie',
+                value: cookie.serialize(name, '', {
+                    path: '/',
+                    domain: config.domain,
+                    expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+                }),
+            })),
         },
     }
 }

@@ -22,32 +22,14 @@ export function badRequest(config: Config): CloudFrontResultResponse {
         statusDescription: 'Bad Request',
         body: page,
         headers: {
-            'set-cookie': [
-                {
-                    key: 'Set-Cookie',
-                    value: cookie.serialize('TOKEN', '', {
-                        path: '/',
-                        domain: config.domain,
-                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
-                    }),
-                },
-                {
-                    key: 'Set-Cookie',
-                    value: cookie.serialize('NONCE', '', {
-                        path: '/',
-                        domain: config.domain,
-                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
-                    }),
-                },
-                {
-                    key: 'Set-Cookie',
-                    value: cookie.serialize('IDP', '', {
-                        path: '/',
-                        domain: config.domain,
-                        expires: new Date(1970, 1, 1, 0, 0, 0, 0),
-                    }),
-                },
-            ],
+            'set-cookie': ['TOKEN', 'NONCE', 'IDP'].map((name) => ({
+                key: 'Set-Cookie',
+                value: cookie.serialize(name, '', {
+                    path: '/',
+                    domain: config.domain,
+                    expires: new Date(1970, 1, 1, 0, 0, 0, 0),
+                }),
+            })),
         },
     }
 }
