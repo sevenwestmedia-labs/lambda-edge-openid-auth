@@ -61,7 +61,7 @@ export const authenticateViewerRequest = async (
 
             if (request.uri.startsWith(config.callbackPath)) {
                 log.info('Callback from OIDC provider received')
-                return callbackHandler(
+                return await callbackHandler(
                     config,
                     idpConfig,
                     log,
@@ -80,7 +80,7 @@ export const authenticateViewerRequest = async (
 
             if (cookies && cookies.TOKEN) {
                 if (request.uri.startsWith(config.refreshPath)) {
-                    return refreshTokenHandler(
+                    return await refreshTokenHandler(
                         config,
                         idpConfig,
                         log,
@@ -90,7 +90,7 @@ export const authenticateViewerRequest = async (
                 }
 
                 log.info('Request received with TOKEN cookie. Validating.')
-                return validateTokenHandler(
+                return await validateTokenHandler(
                     config,
                     idpConfig,
                     log,
