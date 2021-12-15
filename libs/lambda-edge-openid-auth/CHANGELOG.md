@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.1.1
+
+### Patch Changes
+
+- d885f46: Await the async callback handlers since they throw errors which are caught and error responses are returned
+
 ## 0.1.0
 
 ### Minor Changes
