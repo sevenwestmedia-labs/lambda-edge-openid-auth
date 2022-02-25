@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.1.2
+
+### Patch Changes
+
+- 00d4447: Update azuread jwks keys
+
 ## 0.1.1
 
 ### Patch Changes
