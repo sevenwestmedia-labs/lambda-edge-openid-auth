@@ -121,8 +121,13 @@ export function verifyToken(
         header: { kid },
     } = decodeToken(log, token)
 
+    if (!kid) {
+        log.warn({ kid }, 'Missing kid in token')
+        throw new Unauthorized('Missing kid')
+    }
+
     log.info('Searching for JWK from discovery document')
-    const pem = idpConfig.keyIdLookup[kid || '']
+    const pem = idpConfig.keystore.get(kid).toPEM()
     if (!pem) {
         log.warn({ kid }, 'Missing pem')
         throw new Unauthorized('Unknown kid')
@@ -149,18 +154,20 @@ export function verifyToken(
         }
 
         return payload
-    } catch (err: any) {
-        switch (err.name) {
-            case 'BadRequest':
-            case 'Unauthorized':
-            case 'TokenExpiredError':
-                throw err
-            case 'JsonWebTokenError':
-                log.info('JWT error, unauthorized.')
-                throw new Unauthorized(`Json Web Token Error ${err.message}`)
-            default:
-                log.info('Unknown JWT error, unauthorized.')
-                throw new Unauthorized(`Unknown JWT error ${err}`)
+    } catch (err) {
+        if (err instanceof Error && 'name' in err) {
+            switch (err.name) {
+                case 'BadRequest':
+                case 'Unauthorized':
+                case 'TokenExpiredError':
+                    throw err
+                case 'JsonWebTokenError':
+                    log.info('JWT error, unauthorized.')
+                    throw new Unauthorized(`Json Web Token Error ${err.message}`)
+                default:
+            }
         }
+        log.info('Unknown JWT error, unauthorized.')
+        throw new Unauthorized(`Unknown JWT error ${err}`)
     }
 }

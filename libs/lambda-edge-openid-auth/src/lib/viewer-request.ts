@@ -16,13 +16,13 @@ import { TokenExpiredError } from 'jsonwebtoken'
 import { BadRequest, Unauthorized } from './utils/errors'
 import { unauthorized } from './views/unauthorized'
 
-export const authenticateViewerRequest = async (
+export async function authenticateViewerRequest(
     rawConfig: RawConfig,
     log: Logger,
     request: CloudFrontRequest,
-): Promise<CloudFrontRequestResult> => {
+): Promise<CloudFrontRequestResult> {
     try {
-        const { config, idps } = getConfig(rawConfig, request)
+        const { config, idps } = await getConfig(rawConfig, request)
 
         // require no authentication for unauthenticated paths
         if (
@@ -100,7 +100,7 @@ export const authenticateViewerRequest = async (
             }
 
             return redirect(config, idpConfig, request)
-        } catch (err: any) {
+        } catch (err) {
             if (err instanceof TokenExpiredError) {
                 return redirect(config, idpConfig, request)
             } else if (err instanceof BadRequest) {
@@ -115,8 +115,12 @@ export const authenticateViewerRequest = async (
             }
             throw err
         }
-    } catch (err: any) {
-        log.error(err, 'Error encountered when authenticating request')
+    } catch (err) {
+        if (err instanceof Error) {
+            log.error({ err }, 'Error encountered when authenticating request')
+        } else {
+            log.error({ error: err }, 'Error encountered when authenticating request')
+        }
         return internalServerError()
     }
 }

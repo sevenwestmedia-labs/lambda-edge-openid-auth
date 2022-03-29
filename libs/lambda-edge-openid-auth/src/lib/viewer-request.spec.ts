@@ -4,6 +4,7 @@ import { oidcInteraction, oidcServer } from '../tests/oidc-server'
 import { cloudfrontRequest } from '../tests/cloudfront-request'
 import { CloudFrontResultResponse } from 'aws-lambda'
 import { RawConfig } from './config'
+import { JWK } from 'node-jose'
 
 it('can authenticate with OIDC server', async () => {
     const log = pino({})
@@ -16,6 +17,8 @@ it('can authenticate with OIDC server', async () => {
         discoveryDoc,
     } = await oidcServer(['https://localhost/callback'])
 
+    const keystore = await JWK.asKeyStore(jwks)
+
     const rawConfig: RawConfig = {
         unauthenticatedPaths: [],
         idps: [
@@ -23,10 +26,10 @@ it('can authenticate with OIDC server', async () => {
                 clientId,
                 clientSecret,
                 name: 'wanews',
-                type: 'custom' as const,
                 props: {
+                    provider: 'custom',
                     discoveryDoc,
-                    jwks,
+                    keystore,
                 },
             },
         ],
@@ -49,7 +52,7 @@ it('can authenticate with OIDC server', async () => {
         cloudfrontRequest('/login?idp=wanews&next=%2Fcontact'),
     )) as CloudFrontResultResponse
     expect(redirectResponse.status).toEqual('302')
-    expect(redirectResponse.headers!.location[0].value).toContain(
+    expect(redirectResponse.headers?.location[0].value).toContain(
         'http://localhost:3000/connect/auth?',
     )
 
