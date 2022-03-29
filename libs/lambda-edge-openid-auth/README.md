@@ -14,6 +14,9 @@ export const handler: CloudFrontRequestHandler = async (event, context) => {
   const request = record.cf.request
   const log = pino({})
 
+  // Commit the jwks response into your repo (see below to keep updated)
+  const jwks = require('../azure-login-jwks.json')
+
   return authenticateViewerRequest(
     {
       unauthenticatedPaths: ['/assets'],
@@ -25,7 +28,7 @@ export const handler: CloudFrontRequestHandler = async (event, context) => {
           props: {
             type: 'azuread',
             tenantId: 'e5c524fa-185a-4083-b1f1-2032f6bacbd1',
-            jwksPath: './path-to-jwks',
+            jwks,
           },
         },
       ],
@@ -41,30 +44,45 @@ export const handler: CloudFrontRequestHandler = async (event, context) => {
 Azure AD keys can be rotated at any time, so you need to check regularly for rotation
 and redeploy to update the keys.
 
-```ts
-import { writeFileSync } from 'fs'
-import { azureLoginKeyRotationCheck } from '@wanews/lambda-edge-openid-auth'
+### Updating keys with github actions
 
-interface deploymentProvider {
-  deploy(): void
-  getState(name: string): string | undefined
-  setState(name: string, value: string): void
-}
+`````yaml
+#.github/actions/update-azure-jwks/action.yml
+name: 'Update azure login JWKS'
+concurrency: deployment
+env:
+  JWKS_PATH: path/to-jwks.json
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '30 8 * * *'
+jobs:
+  redeploy-on-key-change:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-export async function redeployOnKeyRotiation(provider: deploymentProvider) {
-  // The jwks file must be included in your lambda bundle
-  const jwksPath = './dist/azure-keys.json'
-  const tenantId = 'your-tenant-id'
+      - name: Setup Github Runner
+        uses: ./.github/actions/setup-github-runner
+        with:
+          setup-pulumi: false
 
-  // Azure key ids should be stored in your deployment provider
-  const deployedAzureKeys = provider.getState('azure-key-ids')?.split(',') || []
+      - name: Fetch Azure JWKS
+        with:
+          tenant_id: 'your-tenant-id'
+        run: curl -o ${{JWKS_PATH}} https://login.microsoftonline.com/${{tenant_id}}/discovery/keys
 
-  // Update the keys and redeploy if keys have rotated
-  const result = await azureLoginKeyRotationCheck(tenantId, deployedAzureKeys)
-  if (result.rotated) {
-    writeFileSync(jwksPath, result.jwks)
-    provider.setState('azure-key-ids', result.newKeyIds.join(','))
-    provider.deploy()
-  }
-}
-```
+      - name: Commit Changes
+        continue-on-error: true
+        run: |
+          git config user.email "github.serviceaccount@wanews.com.au"
+          git config user.name "SWM GitHub Service Account"
+          git add ${{JWKS_PATH}}
+          git commit -m "Update azure login JWKS" || echo "No changes to commit"
+          git pull --rebase
+          git push````
+`````

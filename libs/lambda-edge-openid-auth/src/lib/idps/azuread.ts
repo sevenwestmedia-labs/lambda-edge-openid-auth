@@ -1,6 +1,4 @@
 import { DiscoveryDocument } from './discovery-document'
-import { existsSync, readFileSync } from 'fs'
-import { JWK } from 'node-jose'
 
 export const azureadDiscoveryDoc = (tenantId: string): DiscoveryDocument => ({
     token_endpoint: `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`,
@@ -57,12 +55,3 @@ export const azureadDiscoveryDoc = (tenantId: string): DiscoveryDocument => ({
     msgraph_host: 'graph.microsoft.com',
     rbac_url: 'https://pas.windows.net',
 })
-
-
-export function azureadJwks(jwksPath: string) {
-    if (!existsSync(jwksPath)) {
-        throw new Error(`JWKS file ${jwksPath} does not exist`)
-    }
-
-    return JWK.asKeyStore(readFileSync(jwksPath))
-}
