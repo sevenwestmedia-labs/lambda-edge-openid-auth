@@ -4,7 +4,6 @@ import { oidcInteraction, oidcServer } from '../tests/oidc-server'
 import { cloudfrontRequest } from '../tests/cloudfront-request'
 import { CloudFrontResultResponse } from 'aws-lambda'
 import { RawConfig } from './config'
-import { JWK } from 'node-jose'
 
 it('can authenticate with OIDC server', async () => {
     const log = pino({})
@@ -17,7 +16,6 @@ it('can authenticate with OIDC server', async () => {
         discoveryDoc,
     } = await oidcServer(['https://localhost/callback'])
 
-    const keystore = await JWK.asKeyStore(jwks)
 
     const rawConfig: RawConfig = {
         unauthenticatedPaths: [],
@@ -29,7 +27,7 @@ it('can authenticate with OIDC server', async () => {
                 props: {
                     provider: 'custom',
                     discoveryDoc,
-                    keystore,
+                    jwks,
                 },
             },
         ],

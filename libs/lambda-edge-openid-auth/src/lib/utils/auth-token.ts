@@ -4,6 +4,7 @@ import { http, HttpError } from './http'
 import queryString from 'query-string'
 import { BadRequest, Unauthorized } from './errors'
 import jwt from 'jsonwebtoken'
+import jwkToPem from 'jwk-to-pem'
 import { validateNonce } from './nonce'
 
 export interface AccessTokenResponse {
@@ -127,7 +128,7 @@ export function verifyToken(
     }
 
     log.info('Searching for JWK from discovery document')
-    const key = idpConfig.keystore.get(kid)
+    const key = idpConfig.jwks.keys.find((key => key.kid === kid))
     if (!key) {
         log.warn({ kid }, 'Missing key')
         throw new Unauthorized('Unknown kid')
@@ -135,7 +136,7 @@ export function verifyToken(
 
     try {
         log.info('Verifying JWT')
-        const payload = jwt.verify(token, key.toPEM(), {
+        const payload = jwt.verify(token, jwkToPem(key), {
             algorithms: ['RS256'],
             audience: idpConfig.clientId,
             issuer: idpConfig.discoveryDoc.issuer,

@@ -1,4 +1,3 @@
-import { JWK } from 'node-jose'
 import { JWKS } from '../utils/jwks'
 import { azureadDiscoveryDoc } from './azuread'
 import { DiscoveryDocument } from './discovery-document'
@@ -15,7 +14,7 @@ interface CustomIdpProps extends Metadata {
 
 interface Metadata {
     discoveryDoc: DiscoveryDocument
-    keystore: JWK.KeyStore
+    jwks: JWKS
 }
 
 export type ProviderName = 'azuread' | 'custom'
@@ -28,14 +27,14 @@ export async function providerMetadata(props: ProviderProps): Promise<Metadata> 
         case 'azuread': {
             return {
                 discoveryDoc: azureadDiscoveryDoc(props.tenantId),
-                keystore: await JWK.asKeyStore(props.jwks),
+                jwks: props.jwks
             }
         }
 
         case 'custom': {
             return {
                 discoveryDoc: props.discoveryDoc,
-                keystore: props.keystore,
+                jwks: props.jwks
             }
         }
     }
