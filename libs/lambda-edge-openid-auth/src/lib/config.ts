@@ -1,7 +1,7 @@
 import { CloudFrontRequest } from 'aws-lambda'
 import { DiscoveryDocument } from './idps/discovery-document'
 import { providerMetadata, ProviderProps } from './idps'
-import { JWK } from 'node-jose'
+import { JWKS } from './utils/jwks'
 
 export interface RawIdp {
     clientId: string
@@ -19,7 +19,7 @@ export interface Idp {
     clientId: string
     clientSecret: string
     discoveryDoc: DiscoveryDocument
-    keystore: JWK.KeyStore
+    jwks: JWKS
     name: string
 }
 
@@ -58,10 +58,10 @@ export async function getConfig(
         },
         idps: await Promise.all(rawConfig.idps.map(
             async ({ clientId, clientSecret, name, props }) => {
-                const { discoveryDoc, keystore } = await providerMetadata(props)
+                const { discoveryDoc, jwks } = await providerMetadata(props)
                 return {
                     discoveryDoc,
-                    keystore,
+                    jwks,
                     name,
                     clientId,
                     clientSecret,
