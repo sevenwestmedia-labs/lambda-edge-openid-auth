@@ -127,15 +127,15 @@ export function verifyToken(
     }
 
     log.info('Searching for JWK from discovery document')
-    const pem = idpConfig.keystore.get(kid).toPEM()
-    if (!pem) {
-        log.warn({ kid }, 'Missing pem')
+    const key = idpConfig.keystore.get(kid)
+    if (!key) {
+        log.warn({ kid }, 'Missing key')
         throw new Unauthorized('Unknown kid')
     }
 
     try {
         log.info('Verifying JWT')
-        const payload = jwt.verify(token, pem, {
+        const payload = jwt.verify(token, key.toPEM(), {
             algorithms: ['RS256'],
             audience: idpConfig.clientId,
             issuer: idpConfig.discoveryDoc.issuer,
