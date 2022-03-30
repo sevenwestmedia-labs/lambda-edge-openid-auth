@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.2.0
+
+### Minor Changes
+
+- 35d744b: Breaking change - remove hardcoded jwks from repo and move to config
+
 ## 0.1.2
 
 ### Patch Changes
