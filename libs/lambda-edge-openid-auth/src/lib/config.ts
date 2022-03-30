@@ -1,13 +1,12 @@
 import { CloudFrontRequest } from 'aws-lambda'
 import { DiscoveryDocument } from './idps/discovery-document'
-import { createKeyIdToPemsLookup } from './utils/jwks'
-import { providerMetadata, ProviderName, ProviderProps } from './idps'
+import { providerMetadata, ProviderProps } from './idps'
+import { JWK } from 'node-jose'
 
 export interface RawIdp {
     clientId: string
     clientSecret: string
     name: string
-    type: ProviderName
     props: ProviderProps
 }
 
@@ -20,7 +19,7 @@ export interface Idp {
     clientId: string
     clientSecret: string
     discoveryDoc: DiscoveryDocument
-    keyIdLookup: Record<string, string>
+    keystore: JWK.KeyStore
     name: string
 }
 
@@ -37,13 +36,10 @@ export interface Config {
     postLogoutRedirectUri: string
 }
 
-export function getConfig(
+export async function getConfig(
     rawConfig: RawConfig,
     request: CloudFrontRequest,
-): {
-    config: Config
-    idps: Idp[]
-} {
+) {
     const publicUrl = `https://${request.headers.host[0].value}`
     const callbackPath = '/callback'
     const logoutCompletePath = '/logout-complete'
@@ -60,17 +56,17 @@ export function getConfig(
             redirectUri: `${publicUrl}${callbackPath}`,
             postLogoutRedirectUri: `${publicUrl}${logoutCompletePath}`,
         },
-        idps: rawConfig.idps.map(
-            ({ clientId, clientSecret, name, type, props }) => {
-                const { discoveryDoc, jwks } = providerMetadata[type](props)
+        idps: await Promise.all(rawConfig.idps.map(
+            async ({ clientId, clientSecret, name, props }) => {
+                const { discoveryDoc, keystore } = await providerMetadata(props)
                 return {
                     discoveryDoc,
-                    keyIdLookup: createKeyIdToPemsLookup(jwks),
+                    keystore,
                     name,
                     clientId,
                     clientSecret,
                 }
             },
-        ),
+        )),
     }
 }

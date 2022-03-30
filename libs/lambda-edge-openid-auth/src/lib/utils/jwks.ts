@@ -1,5 +1,3 @@
-import jwkToPem from 'jwk-to-pem'
-
 export interface JWKS {
     keys: Array<{
         kty: 'RSA'
@@ -17,13 +15,4 @@ export interface JWKS {
         dq?: string
         qi?: string
     }>
-}
-
-export function createKeyIdToPemsLookup(jwks: JWKS) {
-    return jwks.keys.reduce<Record<string, string>>((acc, jwk) => {
-        if (jwk.kid) {
-            acc[jwk.kid] = jwkToPem(jwk)
-        }
-        return acc
-    }, {})
 }

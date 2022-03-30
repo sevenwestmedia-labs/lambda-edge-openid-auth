@@ -121,16 +121,21 @@ export function verifyToken(
         header: { kid },
     } = decodeToken(log, token)
 
+    if (!kid) {
+        log.warn({ kid }, 'Missing kid in token')
+        throw new Unauthorized('Missing kid')
+    }
+
     log.info('Searching for JWK from discovery document')
-    const pem = idpConfig.keyIdLookup[kid || '']
-    if (!pem) {
-        log.warn({ kid }, 'Missing pem')
+    const key = idpConfig.keystore.get(kid)
+    if (!key) {
+        log.warn({ kid }, 'Missing key')
         throw new Unauthorized('Unknown kid')
     }
 
     try {
         log.info('Verifying JWT')
-        const payload = jwt.verify(token, pem, {
+        const payload = jwt.verify(token, key.toPEM(), {
             algorithms: ['RS256'],
             audience: idpConfig.clientId,
             issuer: idpConfig.discoveryDoc.issuer,
@@ -149,18 +154,20 @@ export function verifyToken(
         }
 
         return payload
-    } catch (err: any) {
-        switch (err.name) {
-            case 'BadRequest':
-            case 'Unauthorized':
-            case 'TokenExpiredError':
-                throw err
-            case 'JsonWebTokenError':
-                log.info('JWT error, unauthorized.')
-                throw new Unauthorized(`Json Web Token Error ${err.message}`)
-            default:
-                log.info('Unknown JWT error, unauthorized.')
-                throw new Unauthorized(`Unknown JWT error ${err}`)
+    } catch (err) {
+        if (err instanceof Error && 'name' in err) {
+            switch (err.name) {
+                case 'BadRequest':
+                case 'Unauthorized':
+                case 'TokenExpiredError':
+                    throw err
+                case 'JsonWebTokenError':
+                    log.info('JWT error, unauthorized.')
+                    throw new Unauthorized(`Json Web Token Error ${err.message}`)
+                default:
+            }
         }
+        log.info('Unknown JWT error, unauthorized.')
+        throw new Unauthorized(`Unknown JWT error ${err}`)
     }
 }
