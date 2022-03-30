@@ -1,5 +1,11 @@
 # @wanews/lambda-edge-openid-auth
 
+## 0.2.1
+
+### Patch Changes
+
+- 2968a98: Remove node-jose
+
 ## 0.2.0
 
 ### Minor Changes
