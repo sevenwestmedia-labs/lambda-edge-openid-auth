@@ -46,43 +46,33 @@ and redeploy to update the keys.
 
 ### Updating keys with github actions
 
-`````yaml
-#.github/actions/update-azure-jwks/action.yml
+```yaml
+#.github/workflows/update-azure-jwks.yml
 name: 'Update azure login JWKS'
 concurrency: deployment
 env:
-  JWKS_PATH: path/to-jwks.json
+  JWKS_PATH: path-to/azure-login-jwks.json
+  # Tenant id doesn't actually matter - all the keys are the same but you need a valid one
+  TENANT_ID: 'your-tenant-id'
 on:
-  push:
-    branches:
-      - master
   schedule:
     - cron: '30 8 * * *'
 jobs:
   redeploy-on-key-change:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Setup Github Runner
-        uses: ./.github/actions/setup-github-runner
-        with:
-          setup-pulumi: false
-
       - name: Fetch Azure JWKS
-        with:
-          tenant_id: 'your-tenant-id'
-        run: curl -o ${{JWKS_PATH}} https://login.microsoftonline.com/${{tenant_id}}/discovery/keys
-
-      - name: Commit Changes
-        continue-on-error: true
         run: |
+          curl -o "$JWKS_PATH" "https://login.microsoftonline.com/$TENANT_ID/discovery/keys"
           git config user.email "github.serviceaccount@wanews.com.au"
           git config user.name "SWM GitHub Service Account"
-          git add ${{JWKS_PATH}}
+          git add "$JWKS_PATH"
           git commit -m "Update azure login JWKS" || echo "No changes to commit"
           git pull --rebase
-          git push````
-`````
+          git push
+```
