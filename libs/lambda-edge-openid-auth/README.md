@@ -1,7 +1,5 @@
 # lambda-edge-openid-auth
 
-TODO: fixme
-
 ## Usage
 
 ```ts
@@ -22,12 +20,12 @@ export const handler: CloudFrontRequestHandler = async (event, context) => {
       unauthenticatedPaths: ['/assets'],
       idps: [
         {
-          clientId: '7804a3f3-5cd6-4ed6-8066-bb8819ee7d92',
-          clientSecret: 'cktzg9nm10001isg55bazg2g8',
+          clientId: '<client-id>',
+          clientSecret: '<client-secret>',
           name: 'Company Azure AD',
           props: {
             type: 'azuread',
-            tenantId: 'e5c524fa-185a-4083-b1f1-2032f6bacbd1',
+            tenantId: '<tenant-id>',
             jwks,
           },
         },
