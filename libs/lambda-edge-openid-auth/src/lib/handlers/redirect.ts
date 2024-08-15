@@ -16,7 +16,7 @@ export function redirect(
         redirect_uri: config.redirectUri,
         response_type: 'code',
         response_mode: 'query',
-        scope: 'openid offline_access email profile',
+        scope: config.scope || 'openid offline_access',
         nonce: n[0],
         state: queryDict.next || '/',
         client_id: idpConfig.clientId,

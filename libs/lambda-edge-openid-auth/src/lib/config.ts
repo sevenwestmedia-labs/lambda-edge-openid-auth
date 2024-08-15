@@ -33,6 +33,7 @@ export interface Config {
     publicUrl: string
     domain: string
     redirectUri: string
+    scope: string
     postLogoutRedirectUri: string
 }
 
@@ -54,19 +55,22 @@ export async function getConfig(
             publicUrl,
             domain: request.headers.host[0].value,
             redirectUri: `${publicUrl}${callbackPath}`,
+            scope: 'openid offline_access email profile',
             postLogoutRedirectUri: `${publicUrl}${logoutCompletePath}`,
         },
-        idps: await Promise.all(rawConfig.idps.map(
-            async ({ clientId, clientSecret, name, props }) => {
-                const { discoveryDoc, jwks } = await providerMetadata(props)
-                return {
-                    discoveryDoc,
-                    jwks,
-                    name,
-                    clientId,
-                    clientSecret,
-                }
-            },
-        )),
+        idps: await Promise.all(
+            rawConfig.idps.map(
+                async ({ clientId, clientSecret, name, props }) => {
+                    const { discoveryDoc, jwks } = await providerMetadata(props)
+                    return {
+                        discoveryDoc,
+                        jwks,
+                        name,
+                        clientId,
+                        clientSecret,
+                    }
+                },
+            ),
+        ),
     }
 }
