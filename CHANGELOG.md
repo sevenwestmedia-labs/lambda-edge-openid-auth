@@ -1,4 +1,16 @@
-# @wanews/lambda-edge-openid-auth
+## 1.0.0-0 (2024-08-16)
+
+- update to nx 19.6.0
+- update to node 20
+- update typescript to 5.5.4
+- remove unused aws-lambda dependency (only using `@types/aws-lambda`)
+- update jsonwebtoken to 9.0.2
+- update jwk-to-pem to 2.0.6
+- update query-string to 9.1.0
+- update pino to 9.3.2
+- update cookie to 0.6.0
+- update node-fetch to 3.3.2
+- refactored from an nx monorepo to a standalone nx package
 
 ## 0.2.1
 

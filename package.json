@@ -1,8 +1,8 @@
 {
   "name": "@wanews/lambda-edge-openid-auth",
-  "version": "0.3.0",
+  "version": "1.0.0-0",
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "src/index.js",
   "scripts": {
     "build": "nx build",
     "test": "nx test",
@@ -20,12 +20,12 @@
     "typescript-log": "^2.0.0"
   },
   "devDependencies": {
-    "@nx/esbuild": "19.6.0",
     "@nx/eslint": "19.6.0",
     "@nx/eslint-plugin": "19.6.0",
     "@nx/jest": "19.6.0",
     "@nx/js": "19.6.0",
     "@nx/node": "19.6.0",
+    "@nx/rollup": "19.6.0",
     "@nx/workspace": "19.6.0",
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
@@ -40,7 +40,6 @@
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
-    "esbuild": "^0.19.2",
     "eslint": "~8.57.0",
     "eslint-config-prettier": "^9.0.0",
     "express": "^4.19.2",
@@ -49,6 +48,7 @@
     "nx": "19.6.0",
     "oidc-provider": "^8.5.1",
     "prettier": "^2.6.2",
+    "rollup": "^4.14.0",
     "supertest": "^7.0.0",
     "supertest-session": "^5.0.1",
     "ts-jest": "^29.1.0",

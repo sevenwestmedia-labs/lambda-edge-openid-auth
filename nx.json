@@ -20,6 +20,11 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectName}"
+      }
     }
   },
   "release": {
@@ -44,6 +49,12 @@
         "targetName": "test"
       },
       "exclude": ["e2e/**/*"]
+    },
+    {
+      "plugin": "@nx/rollup/plugin",
+      "options": {
+        "buildTargetName": "build"
+      }
     }
   ]
 }
