@@ -27,9 +27,9 @@
     "changelog": {
       "workspaceChangelog": {
         "createRelease": "github"
-      },
-      "releaseTagPattern": "@wanews/lambda-edge-openid-auth@${version}"
-    }
+      }
+    },
+    "releaseTagPattern": "@wanews/lambda-edge-openid-auth@{version}"
   },
   "plugins": [
     {
