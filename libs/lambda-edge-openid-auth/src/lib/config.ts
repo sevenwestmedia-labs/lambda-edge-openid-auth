@@ -13,6 +13,7 @@ export interface RawIdp {
 export interface RawConfig {
     unauthenticatedPaths: string[]
     idps: RawIdp[]
+    scope?: string
 }
 
 export interface Idp {
@@ -55,7 +56,7 @@ export async function getConfig(
             publicUrl,
             domain: request.headers.host[0].value,
             redirectUri: `${publicUrl}${callbackPath}`,
-            scope: 'openid offline_access email profile',
+            scope: rawConfig.scope,
             postLogoutRedirectUri: `${publicUrl}${logoutCompletePath}`,
         },
         idps: await Promise.all(
