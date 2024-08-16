@@ -1,6 +1,6 @@
 import fetch, { RequestInfo, RequestInit, Response } from 'node-fetch'
 
-interface HttpResponse<T> extends Response {
+interface HttpResponse<T extends object> extends Response {
     parsedBody?: T
 }
 
@@ -31,14 +31,14 @@ export class HttpError extends Error {
     }
 }
 
-export async function http<T>(
+export async function http<T extends object> (
     url: RequestInfo,
     init?: RequestInit,
 ): Promise<HttpResponse<T>> {
     const response: HttpResponse<T> = await fetch(url, init)
 
     try {
-        response.parsedBody = await response.json()
+        response.parsedBody = await response.json() as T
         // eslint-disable-next-line no-empty
     } catch (err) {}
 

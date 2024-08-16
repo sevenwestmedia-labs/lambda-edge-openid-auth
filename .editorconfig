@@ -1,19 +1,30 @@
-# Editor configuration, see http://editorconfig.org
+# http://editorconfig.org
 root = true
 
 [*]
-charset = utf-8
 indent_style = space
-indent_size = 2
-insert_final_newline = true
+end_of_line = lf
+charset = utf-8
 trim_trailing_whitespace = true
+insert_final_newline = true
 
 [*.ts]
 indent_size = 4
 
-[*.json]
+[*.js]
 indent_size = 4
 
-[*.md]
-max_line_length = off
-trim_trailing_whitespace = false
+[*.tsx]
+indent_size = 4
+
+[*.jsx]
+indent_size = 4
+
+[*.json]
+indent_size = 2
+
+[*.yml]
+indent_size = 2
+
+[*.yaml]
+indent_size = 2

@@ -1,4 +1,4 @@
-import { CloudFrontResultResponse } from 'aws-lambda/common/cloudfront'
+import { CloudFrontResultResponse } from 'aws-lambda'
 import cookie from 'cookie'
 import { Config } from '../config'
 

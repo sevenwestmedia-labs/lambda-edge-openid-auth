@@ -9,31 +9,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
-      - name: Enable node
-        uses: actions/setup-node@master
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: 14.x
+          run_install: false
 
-      - name: Cache .pnpm-store
-        uses: actions/cache@v1
+      - uses: actions/setup-node@v4
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          cache: pnpm
+          node-version-file: .nvmrc
 
-      - name: Install pnpm
-        run: |
-          npm i -g pnpm
-          pnpm set verify-store-integrity false
-
-      - name: pnpm install
-        run: |
-          pnpm install --frozen-lockfile
-
-      - name: Build packages
-        run: pnpm run build-tsc
-
-      - name: Lint types and code
-        run: pnpm run lint
+      - run: pnpm install
+      - run: pnpm run build
+      - run: pnpm run lint
+      - run: pnpm run test

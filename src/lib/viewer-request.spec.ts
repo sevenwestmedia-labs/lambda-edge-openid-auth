@@ -8,14 +8,8 @@ import { RawConfig } from './config'
 it('can authenticate with OIDC server', async () => {
     const log = pino({})
 
-    const {
-        app,
-        clientId,
-        clientSecret,
-        jwks,
-        discoveryDoc,
-    } = await oidcServer(['https://localhost/callback'])
-
+    const { app, clientId, clientSecret, jwks, discoveryDoc } =
+        await oidcServer(['https://localhost/callback'])
 
     const rawConfig: RawConfig = {
         unauthenticatedPaths: [],

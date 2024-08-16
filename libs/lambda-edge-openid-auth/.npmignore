@@ -1,7 +1,0 @@
-tsconfig.json
-tsconifg.*.json
-.eslintrc.json
-.babelrc
-jest.config.js
-!dist
-node_modules
