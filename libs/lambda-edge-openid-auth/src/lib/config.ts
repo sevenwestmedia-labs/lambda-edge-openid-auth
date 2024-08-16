@@ -34,7 +34,7 @@ export interface Config {
     publicUrl: string
     domain: string
     redirectUri: string
-    scope: string
+    scope: string | undefined
     postLogoutRedirectUri: string
 }
 
