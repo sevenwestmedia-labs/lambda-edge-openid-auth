@@ -18,9 +18,19 @@ export async function refreshTokenHandler(
     refreshToken?: string,
 ): Promise<CloudFrontResultResponse> {
     // decode the token to get the expiry
-    const {
-        payload: { exp: currentTokenExp },
-    } = decodeToken(log, token)
+
+    const decodedData = decodeToken(log, token)
+    let currentTokenExp = 0
+
+    try {
+        const payload =
+            typeof decodedData.payload === 'string'
+                ? JSON.parse(decodedData.payload)
+                : decodedData.payload
+        currentTokenExp = payload.exp
+    } catch (e) {
+        /* do nothing */
+    }
 
     // refresh the token 10mins before the expiry
     if (currentTokenExp && Date.now() / 1000 > currentTokenExp - 60 * 10) {

@@ -1,4 +1,4 @@
-import { CloudFrontResultResponse } from 'aws-lambda/common/cloudfront'
+import { CloudFrontResultResponse } from 'aws-lambda'
 
 export function internalServerError(): CloudFrontResultResponse {
     const page = `<!DOCTYPE html>
