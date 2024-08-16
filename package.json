@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
-    "aws-lambda": "^1.0.7",
     "cookie": "^0.6.0",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.6",
