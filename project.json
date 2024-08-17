@@ -1,0 +1,28 @@
+{
+  "name": "lambda-edge-openid-auth",
+  "$schema": "node_modules/nx/schemas/project-schema.json",
+  "includedScripts": [],
+  "sourceRoot": "src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/lambda-edge-openid-auth",
+        "format": ["esm", "cjs"],
+        "bundle": false,
+        "main": "src/index.ts",
+        "generateExportsField": true,
+        "tsConfig": "tsconfig.app.json"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    }
+  }
+}
