@@ -13,6 +13,7 @@ export interface RawIdp {
 export interface RawConfig {
     unauthenticatedPaths: string[]
     idps: RawIdp[]
+    scope?: string
 }
 
 export interface Idp {
@@ -33,6 +34,7 @@ export interface Config {
     publicUrl: string
     domain: string
     redirectUri: string
+    scope: string | undefined
     postLogoutRedirectUri: string
 }
 
@@ -54,19 +56,22 @@ export async function getConfig(
             publicUrl,
             domain: request.headers.host[0].value,
             redirectUri: `${publicUrl}${callbackPath}`,
+            scope: rawConfig.scope,
             postLogoutRedirectUri: `${publicUrl}${logoutCompletePath}`,
         },
-        idps: await Promise.all(rawConfig.idps.map(
-            async ({ clientId, clientSecret, name, props }) => {
-                const { discoveryDoc, jwks } = await providerMetadata(props)
-                return {
-                    discoveryDoc,
-                    jwks,
-                    name,
-                    clientId,
-                    clientSecret,
-                }
-            },
-        )),
+        idps: await Promise.all(
+            rawConfig.idps.map(
+                async ({ clientId, clientSecret, name, props }) => {
+                    const { discoveryDoc, jwks } = await providerMetadata(props)
+                    return {
+                        discoveryDoc,
+                        jwks,
+                        name,
+                        clientId,
+                        clientSecret,
+                    }
+                },
+            ),
+        ),
     }
 }
