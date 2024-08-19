@@ -25,3 +25,19 @@ jobs:
       - run: pnpm run build
       - run: pnpm run lint
       - run: pnpm run test
+
+      - name: Push changes
+        if: steps.version.outputs.changes == 'true'
+        run: |
+          git config user.email "github.serviceaccount@wanews.com.au"
+          git config user.name "SWM GitHub Service Account"
+          git add -A
+          git commit -m "Version packages" || echo "No changes to commit"
+          git push
+
+      - name: Release packages
+        uses: changesets/action@master
+        with:
+          publish: pnpx changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.SERVICE_ACCOUNT_PAT }}
