@@ -1,8 +1,8 @@
+## 1.1.0 (2024-08-20)
+
+- allow OIDC scope to be overridden using config [#12]
+
 # 1.0.0 (2024-08-17)
-
-This was a version bump only, there were no code changes.
-
-## 1.0.0-0 (2024-08-16)
 
 - update to nx 19.6.0
 - update to node 20
