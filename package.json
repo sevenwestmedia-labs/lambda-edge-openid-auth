@@ -23,6 +23,7 @@
   "author": "Seven West Media WA",
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
+    "@types/pino": "^7.0.5",
     "cookie": "^0.6.0",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.6",
