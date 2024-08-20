@@ -1,3 +1,14 @@
+## 1.1.2 (2024-08-20)
+
+
+### 🩹 Fixes
+
+- add package metadata (homepage, author, etc) to package.json ([1c81c0a](https://github.com/sevenwestmedia-labs/lambda-edge-openid-auth/commit/1c81c0a))
+
+### ❤️  Thank You
+
+- Bennett Perkins @bennettp123
+
 ## 1.1.1 (2024-08-20)
 
 This was a version bump only, there were no code changes.
