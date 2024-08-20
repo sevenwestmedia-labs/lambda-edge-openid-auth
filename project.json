@@ -12,6 +12,10 @@
       "defaultConfiguration": "production",
       "options": {
         "platform": "node",
+        "assets": [
+          { "glob": "*.md", "input": ".", "output": "." },
+          { "glob": "LICENSE", "input": ".", "output": "." }
+        ],
         "outputPath": "dist/lambda-edge-openid-auth",
         "format": ["esm", "cjs"],
         "bundle": false,
