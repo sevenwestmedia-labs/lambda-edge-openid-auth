@@ -1,3 +1,7 @@
+## 1.1.1 (2024-08-20)
+
+This was a version bump only, there were no code changes.
+
 ## 1.1.0 (2024-08-20)
 
 - allow OIDC scope to be overridden using config [#12]
