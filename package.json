@@ -8,6 +8,19 @@
     "test": "nx test",
     "lint": "nx lint"
   },
+  "keywords": [
+    "aws",
+    "openid-connect"
+  ],
+  "bugs": {
+    "url": "https://github.com/sevenwestmedia-labs/lambda-edge-openid-auth/issues"
+  },
+  "homepage": "https://github.com/sevenwestmedia-labs/lambda-edge-openid-auth/tree/master/libs/lambda-edge-openid-auth#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sevenwestmedia-labs/lambda-edge-openid-auth.git"
+  },
+  "author": "Seven West Media WA",
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
     "cookie": "^0.6.0",
